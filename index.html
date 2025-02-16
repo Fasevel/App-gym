@@ -118,22 +118,22 @@
       word-wrap: break-word;
     }
     /* Anchos fijos para cada columna en escritorio */
-    #tablaRutinaContainer th:nth-child(1) { width: 13px; }  /* Botón eliminar reducido a la mitad */
-    #tablaRutinaContainer th:nth-child(2) { width: 26px; }  /* DÍA reducido a 40% de 64px */
-    #tablaRutinaContainer th:nth-child(3) { width: 90px; }   /* EJERCICIO reducido a 60% de 150px */
-    #tablaRutinaContainer th:nth-child(4) { width: 36px; }   /* Serie x Reps reducido a 30% de 120px */
-    #tablaRutinaContainer th:nth-child(5) { width: 36px; }   /* Descanso reducido a 30% de 120px */
-    #tablaRutinaContainer th:nth-child(6) { width: 45px; }   /* Notas reducido a 30% de 150px */
-    /* Columnas de semanas: ancho fijo reducido al 50% (de 80px a 40px) */
-    #tablaRutinaContainer th.weekColumn { width: 40px; }
+    #tablaRutinaContainer th:nth-child(1) { width: 13px; }  /* Botón eliminar */
+    #tablaRutinaContainer th:nth-child(2) { width: 26px; }  /* DÍA */
+    #tablaRutinaContainer th:nth-child(3) { width: 90px; }   /* EJERCICIO */
+    #tablaRutinaContainer th:nth-child(4) { width: 36px; }   /* Serie x Reps */
+    #tablaRutinaContainer th:nth-child(5) { width: 36px; }   /* Descanso */
+    #tablaRutinaContainer th:nth-child(6) { width: 45px; }   /* Notas */
+    /* Las columnas de las semanas: ancho fijo reducido */
+    #tablaRutinaContainer th.weekColumn { width: 40px; background-color: #f0f0f0; }
     .nuevo-dia {
       border-top: 3px solid #007BFF !important;
       background-color: #e8f4ff;
     }
     /* Botones de semana */
-    #btnAgregarSemana, #btnEliminarSemana {
+    #btnAgregarSemana, #btnEliminarSemana, #btnExportar {
       margin-top: 10px;
-      width: 48%;
+      width: 32%;
       display: inline-block;
     }
     /* Botón para eliminar ejercicio */
@@ -163,7 +163,7 @@
       position: relative;
     }
     .corp-item img {
-      max-width: 400px; /* Doble tamaño respecto a 200px */
+      max-width: 400px; /* Imagen al doble de tamaño */
       width: 100%;
       height: auto;
       margin-top: 10px;
@@ -184,7 +184,20 @@
     .deleteCorpBtn:hover {
       background-color: #c9302c;
     }
-    /* -------------------- Media Query para móviles -------------------- */
+    /* Filtro por día en pantalla principal */
+    #filtroContainer {
+      margin-bottom: 10px;
+      text-align: right;
+    }
+    #filtroContainer label {
+      font-size: 0.9em;
+      margin-right: 5px;
+    }
+    #filtroContainer select {
+      padding: 4px 6px;
+      font-size: 0.9em;
+    }
+    /* -------------------- Media Query para dispositivos móviles -------------------- */
     @media (max-width: 600px) {
       #tablaRutinaContainer table {
         font-size: 60%;
@@ -192,14 +205,6 @@
       #tablaRutinaContainer th, #tablaRutinaContainer td {
         padding: 4px 5px;
       }
-      /* Ajustar anchos fijos para pantallas pequeñas (aproximadamente la mitad de los valores de escritorio) */
-      #tablaRutinaContainer th:nth-child(1) { width: 7px; }
-      #tablaRutinaContainer th:nth-child(2) { width: 13px; }
-      #tablaRutinaContainer th:nth-child(3) { width: 45px; }
-      #tablaRutinaContainer th:nth-child(4) { width: 18px; }
-      #tablaRutinaContainer th:nth-child(5) { width: 18px; }
-      #tablaRutinaContainer th:nth-child(6) { width: 23px; }
-      #tablaRutinaContainer th.weekColumn { width: 20px; }
     }
   </style>
 </head>
@@ -230,9 +235,23 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
     <!-- Pantalla principal: Rutina y Avances Semanales -->
     <section id="sectionRutina" style="display:block;">
       <h2>Rutina y Avances Semanales</h2>
+      <div id="filtroContainer">
+        <label for="filterDay">Filtrar por Día:</label>
+        <select id="filterDay">
+          <option value="Todos">Todos</option>
+          <option value="Día 1">Día 1</option>
+          <option value="Día 2">Día 2</option>
+          <option value="Día 3">Día 3</option>
+          <option value="Día 4">Día 4</option>
+          <option value="Día 5">Día 5</option>
+          <option value="Día 6">Día 6</option>
+        </select>
+        <button id="btnFiltrar" style="padding:4px 6px; font-size:0.9em;">Filtrar</button>
+      </div>
       <div id="tablaRutinaContainer"></div>
       <button id="btnAgregarSemana">Agregar Semana</button>
       <button id="btnEliminarSemana">Eliminar Semana</button>
+      <button id="btnExportar">Exportar Datos</button>
     </section>
   
     <!-- Sección de Avances Corporales -->
@@ -292,7 +311,7 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
           return getDayNumber(a.dia) - getDayNumber(b.dia);
         });
         
-        // Construir la cabecera de la tabla con anchos fijos
+        // Construir la cabecera de la tabla
         let html = `<table>
           <thead>
             <tr>
@@ -320,6 +339,7 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
             <td data-label="Serie x Reps" contenteditable="true" class="editable" data-field="series" data-index="${idx}">${ej.series}</td>
             <td data-label="Descanso" contenteditable="true" class="editable" data-field="descanso" data-index="${idx}">${ej.descanso}</td>
             <td data-label="Notas" contenteditable="true" class="editable" data-field="notas" data-index="${idx}">${ej.notas}</td>`;
+          // Columnas de avances (orden descendente)
           for (let w = currentWeek - 1; w >= 1; w--) {
             html += `<td data-label="Semana ${w}" contenteditable="true" class="editable" data-field="avance" data-index="${idx}" data-week="${w}">${ej.avances[w-1] || ''}</td>`;
           }
@@ -328,7 +348,7 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
         html += `</tbody></table>`;
         container.innerHTML = html;
 
-        // Asignar acción a botones de eliminación de ejercicio
+        // Botón: eliminar ejercicio
         document.querySelectorAll('.deleteBtn').forEach(btn => {
           btn.addEventListener('click', async (e) => {
             const idx = parseInt(e.target.dataset.index);
@@ -340,7 +360,7 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
           });
         });
 
-        // Actualizar celdas editables al perder el foco
+        // Actualizar celdas editables
         document.querySelectorAll('.editable').forEach(cell => {
           cell.addEventListener('blur', async (e) => {
             const index = parseInt(e.target.dataset.index);
@@ -428,6 +448,40 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
         });
       }
 
+      // Función para exportar datos a CSV
+      function exportToCSV() {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        // Cabecera de la tabla
+        let header = ["DÍA", "EJERCICIO", "SERIE X REPS", "DESCANSO", "NOTAS"];
+        // Agregar cabeceras de semanas (en orden ascendente para exportar)
+        for (let i = 1; i < currentWeek; i++) {
+          header.push("Semana " + i);
+        }
+        csvContent += header.join(",") + "\r\n";
+        // Datos de cada ejercicio (en el orden original, sin orden de filtrado)
+        ejercicios.forEach(ej => {
+          let row = [
+            ej.dia,
+            `"${ej.nombre}"`,  // entre comillas para preservar comas
+            `"${ej.series}"`,
+            `"${ej.descanso}"`,
+            `"${ej.notas}"`
+          ];
+          // Las semanas se exportan en orden ascendente (la columna más antigua primero)
+          for (let i = 0; i < ej.avances.length; i++) {
+            row.push(`"${ej.avances[i] || ""}"`);
+          }
+          csvContent += row.join(",") + "\r\n";
+        });
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "rutina_avances.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
       // -------------------- Eventos del DOM --------------------
       document.addEventListener('DOMContentLoaded', async () => {
         await loadData();
@@ -448,6 +502,11 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
           document.getElementById('sectionRutina').style.display = 'none';
           document.getElementById('sectionCorporales').style.display = 'block';
           renderCorporalesAdvances();
+        });
+
+        // Filtro por día
+        document.getElementById('btnFiltrar').addEventListener('click', () => {
+          renderRoutineTable();
         });
 
         // Carga masiva de ejercicios (única forma de agregar ejercicios)
@@ -497,6 +556,9 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
           }
         });
 
+        // Botón para exportar datos a CSV
+        document.getElementById('btnExportar').addEventListener('click', exportToCSV);
+
         // Avances corporales:
         document.getElementById('formAvanceCorporal').addEventListener('submit', async (e) => {
           e.preventDefault();
@@ -519,5 +581,6 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
   </div>
 </body>
 </html>
+
 
 
