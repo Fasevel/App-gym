@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seguimiento de Rutina de Gimnasio</title>
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore-compat.js"></script>
+  <style>
+    /* Fuente y estilo general inspirado en Apple */
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+      color: #333;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-top: 20px;
+    }
+    header h1 {
+      font-weight: 300;
+      font-size: 2.5em;
+      letter-spacing: 1px;
+      margin: 0;
+    }
+    nav {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid #e5e5e5;
+      padding-bottom: 10px;
+    }
+    nav button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: #333;
+      font-size: 1em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: color 0.3s;
+    }
+    nav button:hover {
+      color: #007BFF;
+    }
+    section {
+      background-color: #fafafa;
+      border: 1px solid #e5e5e5;
+      padding: 20px;
+      border-radius: 4px;
+      margin-bottom: 40px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    form label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 500;
+      font-size: 0.9em;
+      color: #555;
+    }
+    form input, form select, form textarea {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      font-size: 0.95em;
+    }
+    form button {
+      margin-top: 10px;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      background-color: #007BFF;
+      color: #fff;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 1em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: background-color 0.3s;
+    }
+    form button:hover {
+      background-color: #0056b3;
+    }
+    /* Estilos para la tabla principal */
+    #tablaRutinaContainer {
+      overflow-x: auto;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+    #tablaRutinaContainer table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 75%; /* Reducido al 75% */
+    }
+    #tablaRutinaContainer th, #tablaRutinaContainer td {
+      border: 1px solid #ddd;
+      padding: 8px 10px;
+      text-align: left;
+      overflow: hidden;
+      white-space: normal;
+      word-wrap: break-word;
+    }
+    /* Anchos fijos para cada columna */
+    #tablaRutinaContainer th:nth-child(1) { width: 25px; }  /* Columna eliminar */
+    #tablaRutinaContainer th:nth-child(2) { width: 64px; }  /* DÍA (20% menos de 80px) */
+    #tablaRutinaContainer th:nth-child(3) { width: 150px; }
+    #tablaRutinaContainer th:nth-child(4) { width: 120px; }
+    #tablaRutinaContainer th:nth-child(5) { width: 120px; }
+    #tablaRutinaContainer th:nth-child(6) { width: 150px; }
+    /* Las columnas de las semanas tendrán ancho fijo */
+    #tablaRutinaContainer th.weekColumn { width: 80px; }
+    .nuevo-dia {
+      border-top: 3px solid #007BFF !important;
+      background-color: #e8f4ff;
+    }
+    /* Botones de semana */
+    #btnAgregarSemana, #btnEliminarSemana {
+      margin-top: 10px;
+      width: 48%;
+      display: inline-block;
+    }
+    /* Botón para eliminar ejercicio */
+    .deleteBtn {
+      background-color: #d9534f;
+      border: none;
+      color: white;
+      padding: 3px 5px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.75em;
+      transition: background-color 0.3s;
+    }
+    .deleteBtn:hover {
+      background-color: #c9302c;
+    }
+    /* Estilos para avances corporales */
+    #listaCorporales {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .corp-item {
+      border: 1px solid #ddd;
+      padding: 10px;
+      background-color: #fff;
+      position: relative;
+    }
+    .corp-item img {
+      max-width: 400px; /* Imagen al doble de tamaño (200px * 2) */
+      width: 100%;
+      height: auto;
+      margin-top: 10px;
+    }
+    .deleteCorpBtn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: #d9534f;
+      border: none;
+      color: white;
+      padding: 4px 6px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.8em;
+      transition: background-color 0.3s;
+    }
+    .deleteCorpBtn:hover {
+      background-color: #c9302c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Seguimiento de Rutina de Gimnasio</h1>
+    </header>
+  
+    <nav>
+      <button id="btnPantallaCarga">Carga Masiva de Rutinas</button>
+      <button id="btnPantallaRutina">Ver Rutina y Avances</button>
+      <button id="tabCorporales">Avances Corporales</button>
+    </nav>
+  
+    <!-- Pantalla de Carga Masiva de Rutinas -->
+    <section id="sectionCarga" style="display:none;">
+      <h2>Carga Masiva de Ejercicios</h2>
+      <form id="formCargaMasiva">
+        <label for="textareaEjercicios">Pega la tabla de ejercicios (formato tabulado):</label>
+        <textarea id="textareaEjercicios" rows="10" placeholder="DÍA	EJERCICIO	Serie x Reps	Descanso	Notas
+Día 1	Press Banca con Barra	4x6-8	2 min	Doble Progresión
+Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" required></textarea>
+        <button type="submit">Cargar Ejercicios</button>
+      </form>
+    </section>
+  
+    <!-- Pantalla principal: Rutina y Avances Semanales -->
+    <section id="sectionRutina" style="display:block;">
+      <h2>Rutina y Avances Semanales</h2>
+      <div id="tablaRutinaContainer"></div>
+      <button id="btnAgregarSemana">Agregar Semana</button>
+      <button id="btnEliminarSemana">Eliminar Semana</button>
+    </section>
+  
+    <!-- Sección de Avances Corporales -->
+    <section id="sectionCorporales" style="display:none;">
+      <h2>Avances Corporales</h2>
+      <form id="formAvanceCorporal">
+        <label for="fechaCorporal">Fecha:</label>
+        <input type="date" id="fechaCorporal" name="fechaCorporal" required>
+        <label for="peso">Peso (kg):</label>
+        <input type="number" step="0.1" id="peso" name="peso" required>
+        <label for="abdomen">Abdomen (cm):</label>
+        <input type="number" step="0.1" id="abdomen" name="abdomen" required>
+        <label for="muslos">Muslos (cm):</label>
+        <input type="number" step="0.1" id="muslos" name="muslos" required>
+        <label for="foto">Foto:</label>
+        <input type="file" id="foto" name="foto" accept="image/*">
+        <button type="submit">Registrar Avance Corporal</button>
+      </form>
+      <div id="listaCorporales"></div>
+    </section>
+  
+    <script>
+      // -------------------- Configuración de Firebase --------------------
+      const firebaseConfig = {
+        apiKey: "AIzaSyCMG2-WpA387QmZFvEjFXnTPlD4Q9y6Mf8",
+        authDomain: "rutina-gym-83980.firebaseapp.com",
+        projectId: "rutina-gym-83980",
+        storageBucket: "rutina-gym-83980.appspot.com",
+        messagingSenderId: "117371069863",
+        appId: "1:117371069863:web:379814738715de50b60282"
+      };
+
+      // Inicializar Firebase
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      firebase.firestore().enablePersistence().catch((err) => {
+        console.error("Error de persistencia:", err);
+      });
+
+      // -------------------- Variables Globales --------------------
+      let ejercicios = [];
+      let currentWeek = 1;
+      let corporalesAdvances = [];
+      let userId = localStorage.getItem('userId') || Date.now().toString();
+      localStorage.setItem('userId', userId);
+
+      // -------------------- Funciones de Renderizado --------------------
+      function renderRoutineTable() {
+        const container = document.getElementById('tablaRutinaContainer');
+        container.innerHTML = '';
+        // Ordenar ejercicios por día
+        const sortedEjercicios = ejercicios.slice().sort((a, b) => {
+          const getDayNumber = (dia) => {
+            const num = parseInt(dia.split(" ")[1]);
+            return isNaN(num) ? 999 : num;
+          };
+          return getDayNumber(a.dia) - getDayNumber(b.dia);
+        });
+        
+        // Construir la cabecera de la tabla con anchos fijos y sin encabezado para eliminar
+        let html = `<table>
+          <thead>
+            <tr>
+              <th style="width:25px;"></th>
+              <th style="width:64px;">DÍA</th>
+              <th style="width:150px;">EJERCICIO</th>
+              <th style="width:120px;">Serie x Reps</th>
+              <th style="width:120px;">Descanso</th>
+              <th style="width:150px;">Notas</th>`;
+        // Mostrar columnas de semanas en orden descendente (última semana a la izquierda)
+        for (let w = currentWeek - 1; w >= 1; w--) {
+          html += `<th class="weekColumn" style="width:80px;">Semana ${w}</th>`;
+        }
+        html += `</tr>
+          </thead>
+          <tbody>`;
+        let lastDay = "";
+        sortedEjercicios.forEach((ej, idx) => {
+          const rowClass = ej.dia !== lastDay ? "nuevo-dia" : "";
+          if(ej.dia !== lastDay) lastDay = ej.dia;
+          html += `<tr class="${rowClass}">
+            <td><button class="deleteBtn" data-index="${idx}">X</button></td>
+            <td>${ej.dia}</td>
+            <td contenteditable="true" class="editable" data-field="nombre" data-index="${idx}">${ej.nombre}</td>
+            <td contenteditable="true" class="editable" data-field="series" data-index="${idx}">${ej.series}</td>
+            <td contenteditable="true" class="editable" data-field="descanso" data-index="${idx}">${ej.descanso}</td>
+            <td contenteditable="true" class="editable" data-field="notas" data-index="${idx}">${ej.notas}</td>`;
+          // Columnas de avances (orden descendente)
+          for (let w = currentWeek - 1; w >= 1; w--) {
+            html += `<td contenteditable="true" class="editable" data-field="avance" data-index="${idx}" data-week="${w}">${ej.avances[w-1] || ''}</td>`;
+          }
+          html += `</tr>`;
+        });
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+
+        // Evento: asignar acción a botones de eliminación de ejercicio
+        document.querySelectorAll('.deleteBtn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const idx = parseInt(e.target.dataset.index);
+            if (!isNaN(idx)) {
+              ejercicios.splice(idx, 1);
+              await updateFirestore();
+              renderRoutineTable();
+            }
+          });
+        });
+
+        // Evento: actualizar celdas editables al perder el foco
+        document.querySelectorAll('.editable').forEach(cell => {
+          cell.addEventListener('blur', async (e) => {
+            const index = parseInt(e.target.dataset.index);
+            const field = e.target.dataset.field;
+            if (field === 'avance') {
+              const week = parseInt(e.target.dataset.week);
+              ejercicios[index].avances[week - 1] = e.target.textContent.trim();
+            } else {
+              ejercicios[index][field] = e.target.textContent.trim();
+            }
+            await updateFirestore();
+          });
+        });
+      }
+
+      function renderCorporalesAdvances() {
+        const container = document.getElementById('listaCorporales');
+        let html = '';
+        corporalesAdvances.forEach((av, idx) => {
+          html += `
+            <div class="corp-item">
+              <button class="deleteCorpBtn" data-index="${idx}">X</button>
+              <strong>Fecha:</strong> ${av.fecha}<br>
+              <strong>Peso:</strong> ${av.peso} kg<br>
+              <strong>Abdomen:</strong> ${av.abdomen} cm<br>
+              <strong>Muslos:</strong> ${av.muslos} cm<br>
+              ${av.foto ? `<img src="${av.foto}">` : ''}
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+
+        document.querySelectorAll('.deleteCorpBtn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const index = parseInt(e.target.dataset.index);
+            if (!isNaN(index)) {
+              corporalesAdvances.splice(index, 1);
+              await updateFirestore();
+              renderCorporalesAdvances();
+            }
+          });
+        });
+      }
+
+      // -------------------- Funciones de Firebase --------------------
+      async function updateFirestore() {
+        try {
+          await db.collection('rutinas').doc(userId).set({
+            ejercicios: ejercicios,
+            currentWeek: currentWeek
+          }, { merge: true });
+          await db.collection('avancesCorporales').doc(userId).set({
+            advances: corporalesAdvances
+          }, { merge: true });
+          console.log("Datos actualizados en Firestore");
+        } catch (error) {
+          console.error("Error guardando datos:", error);
+        }
+      }
+
+      async function loadData() {
+        try {
+          const rutinaDoc = await db.collection('rutinas').doc(userId).get();
+          const avancesDoc = await db.collection('avancesCorporales').doc(userId).get();
+          if (rutinaDoc.exists) {
+            ejercicios = rutinaDoc.data().ejercicios || [];
+            currentWeek = rutinaDoc.data().currentWeek || 1;
+            renderRoutineTable();
+          }
+          if (avancesDoc.exists) {
+            corporalesAdvances = avancesDoc.data().advances || [];
+            renderCorporalesAdvances();
+          }
+        } catch (error) {
+          console.error("Error al cargar datos:", error);
+        }
+      }
+
+      // Helper para leer archivos
+      function readFile(file) {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      // -------------------- Eventos del DOM --------------------
+      document.addEventListener('DOMContentLoaded', async () => {
+        await loadData();
+
+        // Navegación entre pantallas
+        document.getElementById('btnPantallaCarga').addEventListener('click', () => {
+          document.getElementById('sectionCarga').style.display = 'block';
+          document.getElementById('sectionRutina').style.display = 'none';
+          document.getElementById('sectionCorporales').style.display = 'none';
+        });
+        document.getElementById('btnPantallaRutina').addEventListener('click', () => {
+          document.getElementById('sectionCarga').style.display = 'none';
+          document.getElementById('sectionRutina').style.display = 'block';
+          document.getElementById('sectionCorporales').style.display = 'none';
+        });
+        document.getElementById('tabCorporales').addEventListener('click', () => {
+          document.getElementById('sectionCarga').style.display = 'none';
+          document.getElementById('sectionRutina').style.display = 'none';
+          document.getElementById('sectionCorporales').style.display = 'block';
+          renderCorporalesAdvances();
+        });
+
+        // Carga masiva de ejercicios (única forma de agregar ejercicios)
+        document.getElementById('formCargaMasiva').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const text = document.getElementById('textareaEjercicios').value;
+          text.split('\n').forEach(line => {
+            const [dia, nombre, series, descanso, notas] = line.split('\t');
+            if(dia && nombre) {
+              ejercicios.push({
+                dia: dia.trim(),
+                nombre: nombre.trim(),
+                series: series?.trim() || "",
+                descanso: descanso?.trim() || "",
+                notas: notas?.trim() || "",
+                avances: [],
+                currentAdvance: ""
+              });
+            }
+          });
+          await updateFirestore();
+          renderRoutineTable();
+          e.target.reset();
+        });
+
+        // Botón para agregar semana: crea una nueva columna vacía en cada ejercicio
+        document.getElementById('btnAgregarSemana').addEventListener('click', async () => {
+          ejercicios.forEach(ej => {
+            ej.avances.push(""); // Agrega entrada vacía para la nueva semana
+          });
+          currentWeek++;
+          await updateFirestore();
+          renderRoutineTable();
+        });
+
+        // Botón para eliminar la última semana: elimina la última columna de cada ejercicio
+        document.getElementById('btnEliminarSemana').addEventListener('click', async () => {
+          if (currentWeek > 1) {
+            ejercicios.forEach(ej => {
+              ej.avances.pop();
+            });
+            currentWeek--;
+            await updateFirestore();
+            renderRoutineTable();
+          } else {
+            alert("No hay semanas para eliminar.");
+          }
+        });
+
+        // Avances corporales:
+        document.getElementById('formAvanceCorporal').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const file = formData.get('foto');
+          const avance = {
+            fecha: formData.get('fechaCorporal'),
+            peso: formData.get('peso'),
+            abdomen: formData.get('abdomen'),
+            muslos: formData.get('muslos'),
+            foto: file ? await readFile(file) : null
+          };
+          corporalesAdvances.push(avance);
+          await updateFirestore();
+          renderCorporalesAdvances();
+          e.target.reset();
+        });
+      });
+    </script>
+  </div>
+</body>
+</html>
