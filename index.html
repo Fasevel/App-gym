@@ -117,15 +117,15 @@
       white-space: normal;
       word-wrap: break-word;
     }
-    /* Anchos fijos para cada columna */
-    #tablaRutinaContainer th:nth-child(1) { width: 25px; }  /* Columna eliminar */
-    #tablaRutinaContainer th:nth-child(2) { width: 64px; }  /* DÍA */
-    #tablaRutinaContainer th:nth-child(3) { width: 150px; }
-    #tablaRutinaContainer th:nth-child(4) { width: 120px; }
-    #tablaRutinaContainer th:nth-child(5) { width: 120px; }
-    #tablaRutinaContainer th:nth-child(6) { width: 150px; }
-    /* Las columnas de las semanas tendrán ancho fijo */
-    #tablaRutinaContainer th.weekColumn { width: 80px; }
+    /* Anchos fijos para cada columna en escritorio */
+    #tablaRutinaContainer th:nth-child(1) { width: 13px; }  /* Botón eliminar reducido a la mitad */
+    #tablaRutinaContainer th:nth-child(2) { width: 26px; }  /* DÍA reducido a 40% de 64px */
+    #tablaRutinaContainer th:nth-child(3) { width: 90px; }   /* EJERCICIO reducido a 60% de 150px */
+    #tablaRutinaContainer th:nth-child(4) { width: 36px; }   /* Serie x Reps reducido a 30% de 120px */
+    #tablaRutinaContainer th:nth-child(5) { width: 36px; }   /* Descanso reducido a 30% de 120px */
+    #tablaRutinaContainer th:nth-child(6) { width: 45px; }   /* Notas reducido a 30% de 150px */
+    /* Columnas de semanas: ancho fijo reducido al 50% (de 80px a 40px) */
+    #tablaRutinaContainer th.weekColumn { width: 40px; }
     .nuevo-dia {
       border-top: 3px solid #007BFF !important;
       background-color: #e8f4ff;
@@ -163,7 +163,7 @@
       position: relative;
     }
     .corp-item img {
-      max-width: 400px; /* Doble tamaño */
+      max-width: 400px; /* Doble tamaño respecto a 200px */
       width: 100%;
       height: auto;
       margin-top: 10px;
@@ -184,52 +184,22 @@
     .deleteCorpBtn:hover {
       background-color: #c9302c;
     }
-    /* -------------------- Responsive Table: Stacked Layout para móviles -------------------- */
+    /* -------------------- Media Query para móviles -------------------- */
     @media (max-width: 600px) {
-      #tablaRutinaContainer table,
-      #tablaRutinaContainer thead,
-      #tablaRutinaContainer tbody,
-      #tablaRutinaContainer th,
-      #tablaRutinaContainer td,
-      #tablaRutinaContainer tr {
-        display: block;
+      #tablaRutinaContainer table {
+        font-size: 60%;
       }
-      #tablaRutinaContainer thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
+      #tablaRutinaContainer th, #tablaRutinaContainer td {
+        padding: 4px 5px;
       }
-      #tablaRutinaContainer tr {
-        border: 1px solid #ddd;
-        margin-bottom: 10px;
-      }
-      #tablaRutinaContainer td {
-        border: none;
-        position: relative;
-        padding-left: 50%;
-        text-align: right;
-      }
-      #tablaRutinaContainer td:before {
-        position: absolute;
-        top: 8px;
-        left: 10px;
-        width: 45%;
-        padding-right: 10px;
-        white-space: nowrap;
-        text-align: left;
-        font-weight: bold;
-      }
-      /* Definir etiquetas para cada columna */
-      #tablaRutinaContainer td:nth-of-type(1):before { content: ""; }  /* Botón eliminar no se muestra */
-      #tablaRutinaContainer td:nth-of-type(2):before { content: "DÍA"; }
-      #tablaRutinaContainer td:nth-of-type(3):before { content: "EJERCICIO"; }
-      #tablaRutinaContainer td:nth-of-type(4):before { content: "Serie x Reps"; }
-      #tablaRutinaContainer td:nth-of-type(5):before { content: "Descanso"; }
-      #tablaRutinaContainer td:nth-of-type(6):before { content: "Notas"; }
-      /* Para las columnas de semana, se asigna etiqueta dinámica */
-      #tablaRutinaContainer td:nth-of-type(n+7):before {
-        content: attr(data-label);
-      }
+      /* Ajustar anchos fijos para pantallas pequeñas (aproximadamente la mitad de los valores de escritorio) */
+      #tablaRutinaContainer th:nth-child(1) { width: 7px; }
+      #tablaRutinaContainer th:nth-child(2) { width: 13px; }
+      #tablaRutinaContainer th:nth-child(3) { width: 45px; }
+      #tablaRutinaContainer th:nth-child(4) { width: 18px; }
+      #tablaRutinaContainer th:nth-child(5) { width: 18px; }
+      #tablaRutinaContainer th:nth-child(6) { width: 23px; }
+      #tablaRutinaContainer th.weekColumn { width: 20px; }
     }
   </style>
 </head>
@@ -322,19 +292,19 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
           return getDayNumber(a.dia) - getDayNumber(b.dia);
         });
         
-        // Construir la cabecera de la tabla
+        // Construir la cabecera de la tabla con anchos fijos
         let html = `<table>
           <thead>
             <tr>
-              <th style="width:25px;"></th>
-              <th style="width:64px;">DÍA</th>
-              <th style="width:150px;">EJERCICIO</th>
-              <th style="width:120px;">Serie x Reps</th>
-              <th style="width:120px;">Descanso</th>
-              <th style="width:150px;">Notas</th>`;
-        // Columnas de semanas en orden descendente (última semana a la izquierda)
+              <th style="width:13px;"></th>
+              <th style="width:26px;">DÍA</th>
+              <th style="width:90px;">EJERCICIO</th>
+              <th style="width:36px;">Serie x Reps</th>
+              <th style="width:36px;">Descanso</th>
+              <th style="width:45px;">Notas</th>`;
+        // Columnas de semanas en orden descendente
         for (let w = currentWeek - 1; w >= 1; w--) {
-          html += `<th class="weekColumn" style="width:80px;">Semana ${w}</th>`;
+          html += `<th class="weekColumn" style="width:40px;">Semana ${w}</th>`;
         }
         html += `</tr>
           </thead>
@@ -350,7 +320,6 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
             <td data-label="Serie x Reps" contenteditable="true" class="editable" data-field="series" data-index="${idx}">${ej.series}</td>
             <td data-label="Descanso" contenteditable="true" class="editable" data-field="descanso" data-index="${idx}">${ej.descanso}</td>
             <td data-label="Notas" contenteditable="true" class="editable" data-field="notas" data-index="${idx}">${ej.notas}</td>`;
-          // Columnas de avances (orden descendente)
           for (let w = currentWeek - 1; w >= 1; w--) {
             html += `<td data-label="Semana ${w}" contenteditable="true" class="editable" data-field="avance" data-index="${idx}" data-week="${w}">${ej.avances[w-1] || ''}</td>`;
           }
@@ -359,7 +328,7 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
         html += `</tbody></table>`;
         container.innerHTML = html;
 
-        // Botón: eliminar ejercicio
+        // Asignar acción a botones de eliminación de ejercicio
         document.querySelectorAll('.deleteBtn').forEach(btn => {
           btn.addEventListener('click', async (e) => {
             const idx = parseInt(e.target.dataset.index);
@@ -371,7 +340,7 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
           });
         });
 
-        // Actualizar celdas editables
+        // Actualizar celdas editables al perder el foco
         document.querySelectorAll('.editable').forEach(cell => {
           cell.addEventListener('blur', async (e) => {
             const index = parseInt(e.target.dataset.index);
