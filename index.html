@@ -119,7 +119,7 @@
     }
     /* Anchos fijos para cada columna */
     #tablaRutinaContainer th:nth-child(1) { width: 25px; }  /* Columna eliminar */
-    #tablaRutinaContainer th:nth-child(2) { width: 64px; }  /* DÍA (20% menos de 80px) */
+    #tablaRutinaContainer th:nth-child(2) { width: 64px; }  /* DÍA */
     #tablaRutinaContainer th:nth-child(3) { width: 150px; }
     #tablaRutinaContainer th:nth-child(4) { width: 120px; }
     #tablaRutinaContainer th:nth-child(5) { width: 120px; }
@@ -163,7 +163,7 @@
       position: relative;
     }
     .corp-item img {
-      max-width: 400px; /* Imagen al doble de tamaño (200px * 2) */
+      max-width: 400px; /* Imagen al doble de tamaño */
       width: 100%;
       height: auto;
       margin-top: 10px;
@@ -183,6 +183,23 @@
     }
     .deleteCorpBtn:hover {
       background-color: #c9302c;
+    }
+    /* ----------------- Media Query para dispositivos móviles ----------------- */
+    @media (max-width: 600px) {
+      #tablaRutinaContainer table {
+        font-size: 60%; /* Reducir aún más el tamaño de la fuente */
+      }
+      #tablaRutinaContainer th, #tablaRutinaContainer td {
+        padding: 4px 5px;
+      }
+      /* Ajustar anchos fijos para pantallas pequeñas */
+      #tablaRutinaContainer th:nth-child(1) { width: 20px; }
+      #tablaRutinaContainer th:nth-child(2) { width: 50px; }
+      #tablaRutinaContainer th:nth-child(3) { width: 100px; }
+      #tablaRutinaContainer th:nth-child(4) { width: 80px; }
+      #tablaRutinaContainer th:nth-child(5) { width: 80px; }
+      #tablaRutinaContainer th:nth-child(6) { width: 100px; }
+      #tablaRutinaContainer th.weekColumn { width: 60px; }
     }
   </style>
 </head>
@@ -503,3 +520,4 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
   </div>
 </body>
 </html>
+
