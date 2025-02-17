@@ -97,35 +97,44 @@
     form button:hover {
       background-color: #0056b3;
     }
-    /* Estilos para la tabla principal */
+    /* Contenedor de la tabla principal */
     #tablaRutinaContainer {
       overflow-x: auto;
       margin: 0 auto;
       max-width: 100%;
     }
+    /* Estilos para la tabla */
     #tablaRutinaContainer table {
       width: 100%;
       border-collapse: collapse;
       table-layout: fixed;
-      font-size: 75%; /* Reducido al 75% */
+      font-size: 75%;
     }
-    #tablaRutinaContainer th, #tablaRutinaContainer td {
+    #tablaRutinaContainer th, 
+    #tablaRutinaContainer td {
       border: 1px solid #ddd;
       padding: 8px 10px;
       text-align: left;
       overflow: hidden;
-      white-space: normal;
+      white-space: nowrap;
+      text-overflow: ellipsis;
       word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: normal;
     }
     /* Anchos fijos para cada columna en escritorio */
-    #tablaRutinaContainer th:nth-child(1) { width: 13px; }  /* Botón eliminar */
-    #tablaRutinaContainer th:nth-child(2) { width: 26px; }  /* DÍA */
+    #tablaRutinaContainer th:nth-child(1) { width: 12px; }  /* Botón eliminar */
+    #tablaRutinaContainer th:nth-child(2) { width: 38px; }  /* DÍA */
     #tablaRutinaContainer th:nth-child(3) { width: 90px; }   /* EJERCICIO */
     #tablaRutinaContainer th:nth-child(4) { width: 36px; }   /* Serie x Reps */
     #tablaRutinaContainer th:nth-child(5) { width: 36px; }   /* Descanso */
     #tablaRutinaContainer th:nth-child(6) { width: 45px; }   /* Notas */
-    /* Las columnas de las semanas: ancho fijo reducido */
-    #tablaRutinaContainer th.weekColumn { width: 40px; background-color: #f0f0f0; }
+    /* Columnas de semanas: ancho fijo 50% de lo anterior (de 40px a 20px) */
+    #tablaRutinaContainer th.weekColumn { width: 20px; background-color: #f0f0f0; }
+    /* También aplicar sombreado a las celdas de avance */
+    #tablaRutinaContainer td[data-field="avance"] {
+      background-color: #f0f0f0;
+    }
     .nuevo-dia {
       border-top: 3px solid #007BFF !important;
       background-color: #e8f4ff;
@@ -150,6 +159,19 @@
     .deleteBtn:hover {
       background-color: #c9302c;
     }
+    /* Filtro por día */
+    #filtroContainer {
+      margin-bottom: 10px;
+      text-align: right;
+    }
+    #filtroContainer label {
+      font-size: 0.9em;
+      margin-right: 5px;
+    }
+    #filtroContainer select {
+      padding: 4px 6px;
+      font-size: 0.9em;
+    }
     /* Estilos para avances corporales */
     #listaCorporales {
       display: grid;
@@ -163,7 +185,7 @@
       position: relative;
     }
     .corp-item img {
-      max-width: 400px; /* Imagen al doble de tamaño */
+      max-width: 400px; /* Doble tamaño (si el original es 200px) */
       width: 100%;
       height: auto;
       margin-top: 10px;
@@ -184,19 +206,6 @@
     .deleteCorpBtn:hover {
       background-color: #c9302c;
     }
-    /* Filtro por día en pantalla principal */
-    #filtroContainer {
-      margin-bottom: 10px;
-      text-align: right;
-    }
-    #filtroContainer label {
-      font-size: 0.9em;
-      margin-right: 5px;
-    }
-    #filtroContainer select {
-      padding: 4px 6px;
-      font-size: 0.9em;
-    }
     /* -------------------- Media Query para dispositivos móviles -------------------- */
     @media (max-width: 600px) {
       #tablaRutinaContainer table {
@@ -205,6 +214,14 @@
       #tablaRutinaContainer th, #tablaRutinaContainer td {
         padding: 4px 5px;
       }
+      /* Aproximadamente la mitad de los anchos en escritorio */
+      #tablaRutinaContainer th:nth-child(1) { width: 6px; }
+      #tablaRutinaContainer th:nth-child(2) { width: 19px; }
+      #tablaRutinaContainer th:nth-child(3) { width: 45px; }
+      #tablaRutinaContainer th:nth-child(4) { width: 18px; }
+      #tablaRutinaContainer th:nth-child(5) { width: 18px; }
+      #tablaRutinaContainer th:nth-child(6) { width: 23px; }
+      #tablaRutinaContainer th.weekColumn { width: 10px; }
     }
   </style>
 </head>
@@ -311,25 +328,31 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
           return getDayNumber(a.dia) - getDayNumber(b.dia);
         });
         
+        // Filtrar según selección (comparación en minúsculas)
+        const filterValue = document.getElementById('filterDay').value;
+        const filteredEjercicios = filterValue === "Todos" ? 
+          sortedEjercicios : 
+          sortedEjercicios.filter(ej => ej.dia.toLowerCase().trim() === filterValue.toLowerCase().trim());
+        
         // Construir la cabecera de la tabla
         let html = `<table>
           <thead>
             <tr>
-              <th style="width:13px;"></th>
-              <th style="width:26px;">DÍA</th>
+              <th style="width:12px;"></th>
+              <th style="width:38px;">DÍA</th>
               <th style="width:90px;">EJERCICIO</th>
               <th style="width:36px;">Serie x Reps</th>
               <th style="width:36px;">Descanso</th>
               <th style="width:45px;">Notas</th>`;
         // Columnas de semanas en orden descendente
         for (let w = currentWeek - 1; w >= 1; w--) {
-          html += `<th class="weekColumn" style="width:40px;">Semana ${w}</th>`;
+          html += `<th class="weekColumn" style="width:20px;">Semana ${w}</th>`;
         }
         html += `</tr>
           </thead>
           <tbody>`;
         let lastDay = "";
-        sortedEjercicios.forEach((ej, idx) => {
+        filteredEjercicios.forEach((ej, idx) => {
           const rowClass = ej.dia !== lastDay ? "nuevo-dia" : "";
           if(ej.dia !== lastDay) lastDay = ej.dia;
           html += `<tr class="${rowClass}">
@@ -451,23 +474,19 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
       // Función para exportar datos a CSV
       function exportToCSV() {
         let csvContent = "data:text/csv;charset=utf-8,";
-        // Cabecera de la tabla
         let header = ["DÍA", "EJERCICIO", "SERIE X REPS", "DESCANSO", "NOTAS"];
-        // Agregar cabeceras de semanas (en orden ascendente para exportar)
         for (let i = 1; i < currentWeek; i++) {
           header.push("Semana " + i);
         }
         csvContent += header.join(",") + "\r\n";
-        // Datos de cada ejercicio (en el orden original, sin orden de filtrado)
         ejercicios.forEach(ej => {
           let row = [
             ej.dia,
-            `"${ej.nombre}"`,  // entre comillas para preservar comas
+            `"${ej.nombre}"`,
             `"${ej.series}"`,
             `"${ej.descanso}"`,
             `"${ej.notas}"`
           ];
-          // Las semanas se exportan en orden ascendente (la columna más antigua primero)
           for (let i = 0; i < ej.avances.length; i++) {
             row.push(`"${ej.avances[i] || ""}"`);
           }
@@ -504,7 +523,10 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
           renderCorporalesAdvances();
         });
 
-        // Filtro por día
+        // Filtro por día: actualizar la tabla al cambiar la selección
+        document.getElementById('filterDay').addEventListener('change', () => {
+          renderRoutineTable();
+        });
         document.getElementById('btnFiltrar').addEventListener('click', () => {
           renderRoutineTable();
         });
@@ -535,7 +557,7 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
         // Botón para agregar semana: crea una nueva columna vacía en cada ejercicio
         document.getElementById('btnAgregarSemana').addEventListener('click', async () => {
           ejercicios.forEach(ej => {
-            ej.avances.push(""); // Agrega entrada vacía para la nueva semana
+            ej.avances.push("");
           });
           currentWeek++;
           await updateFirestore();
