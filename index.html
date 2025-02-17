@@ -121,15 +121,15 @@
       word-break: normal;
     }
     /* Anchos fijos para cada columna en escritorio */
-    #tablaRutinaContainer th:nth-child(1) { width: 12px; }  /* Botón eliminar (reducción al 50%) */
-    #tablaRutinaContainer th:nth-child(2) { width: 38px; }  /* DÍA reducido al 60% de 64px */
-    #tablaRutinaContainer th:nth-child(3) { width: 90px; }   /* EJERCICIO reducido al 40% de 150px */
-    #tablaRutinaContainer th:nth-child(4) { width: 36px; }   /* Serie x Reps reducido al 70% de 120px */
-    #tablaRutinaContainer th:nth-child(5) { width: 36px; }   /* Descanso reducido al 70% de 120px */
-    #tablaRutinaContainer th:nth-child(6) { width: 45px; }   /* Notas reducido al 70% de 150px */
-    /* Columnas de semanas: ancho fijo reducido al 50% (de 40px a 20px) */
+    #tablaRutinaContainer th:nth-child(1) { width: 12px; }  /* Botón eliminar */
+    #tablaRutinaContainer th:nth-child(2) { width: 38px; }  /* DÍA */
+    #tablaRutinaContainer th:nth-child(3) { width: 90px; }   /* EJERCICIO */
+    #tablaRutinaContainer th:nth-child(4) { width: 36px; }   /* Serie x Reps */
+    #tablaRutinaContainer th:nth-child(5) { width: 36px; }   /* Descanso */
+    #tablaRutinaContainer th:nth-child(6) { width: 45px; }   /* Notas */
+    /* Columnas de semanas: ancho fijo reducido al 50% */
     #tablaRutinaContainer th.weekColumn { width: 20px; background-color: #f0f0f0; }
-    /* Aplicar sombreado completo a las celdas de semanas */
+    /* Aplicar sombreado completo a las celdas de semana */
     #tablaRutinaContainer td[data-field="avance"] {
       background-color: #f0f0f0;
     }
@@ -183,7 +183,7 @@
       position: relative;
     }
     .corp-item img {
-      max-width: 400px; /* Doble tamaño */
+      max-width: 400px; /* Imagen al doble de tamaño */
       width: 100%;
       height: auto;
       margin-top: 10px;
@@ -252,14 +252,15 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
       <h2>Rutina y Avances Semanales</h2>
       <div id="filtroContainer">
         <label for="filterDay">Filtrar por Día:</label>
+        <!-- Ahora las opciones tienen los mismos valores que se muestran en la tabla -->
         <select id="filterDay">
           <option value="Todos">Todos</option>
-          <option value="Día 1">Día 1</option>
-          <option value="Día 2">Día 2</option>
-          <option value="Día 3">Día 3</option>
-          <option value="Día 4">Día 4</option>
-          <option value="Día 5">Día 5</option>
-          <option value="Día 6">Día 6</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
         </select>
         <button id="btnFiltrar" style="padding:4px 6px; font-size:0.9em;">Filtrar</button>
       </div>
@@ -317,21 +318,25 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
       function renderRoutineTable() {
         const container = document.getElementById('tablaRutinaContainer');
         container.innerHTML = '';
-        // Ordenar ejercicios por día
+        // Ordenar ejercicios por día usando una función que admite tanto "Día 1" como "1"
         const sortedEjercicios = ejercicios.slice().sort((a, b) => {
           const getDayNumber = (dia) => {
-            const num = parseInt(dia.split(" ")[1]);
-            return isNaN(num) ? 999 : num;
+            dia = dia.trim();
+            if(dia.toLowerCase().startsWith("día")) {
+              return parseInt(dia.split(" ")[1]) || 999;
+            } else {
+              return parseInt(dia) || 999;
+            }
           };
           return getDayNumber(a.dia) - getDayNumber(b.dia);
         });
         
-        // Filtrar según selección (usando includes para mayor flexibilidad)
+        // Filtrar según selección: los valores del filtro ahora son "1", "2", etc.
         const filterValue = document.getElementById('filterDay').value;
         const filteredEjercicios = filterValue === "Todos" ? 
           sortedEjercicios : 
-          sortedEjercicios.filter(ej => ej.dia.toLowerCase().includes(filterValue.toLowerCase().trim()));
-        
+          sortedEjercicios.filter(ej => ej.dia.trim() === filterValue);
+
         // Construir la cabecera de la tabla
         let html = `<table>
           <thead>
@@ -528,7 +533,7 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
           renderRoutineTable();
         });
 
-        // Carga masiva de ejercicios (única forma de agregar ejercicios)
+        // Carga masiva de ejercicios
         document.getElementById('formCargaMasiva').addEventListener('submit', async (e) => {
           e.preventDefault();
           const text = document.getElementById('textareaEjercicios').value;
@@ -600,5 +605,4 @@ Día 1	Press Inclinado Mancuernas	3x8-10	90 seg	1+ rep/semana hasta subir peso" 
   </div>
 </body>
 </html>
-
 
