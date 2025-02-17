@@ -207,19 +207,19 @@
     /* -------------------- Media Query para dispositivos móviles -------------------- */
     @media (max-width: 600px) {
       #tablaRutinaContainer table {
-        font-size: 60%;
+        font-size: 50%;
       }
       #tablaRutinaContainer th, #tablaRutinaContainer td {
         padding: 4px 5px;
       }
       /* Aproximadamente la mitad de los anchos en escritorio */
       #tablaRutinaContainer th:nth-child(1) { width: 7px; } /* Botón eliminar */
-      #tablaRutinaContainer th:nth-child(2) { width: 8px; } /* DIA */
+      #tablaRutinaContainer th:nth-child(2) { width: 7px; } /* DIA */
       #tablaRutinaContainer th:nth-child(3) { width: 40px; } /* EJERCICIO */
       #tablaRutinaContainer th:nth-child(4) { width: 18px; } /* SERIES X REPS */
       #tablaRutinaContainer th:nth-child(5) { width: 18px; } /* DESCANSO */
       #tablaRutinaContainer th:nth-child(6) { width: 35px; } /* NOTAS */
-      #tablaRutinaContainer th.weekColumn { width: 30px; } /* SEMANAS */
+      #tablaRutinaContainer th.weekColumn { width: 40px; } /* SEMANAS */
     }
   </style>
 </head>
@@ -230,8 +230,8 @@
     </header>
   
     <nav>
-      <button id="btnPantallaCarga">Carga Masiva de Rutinas</button>
       <button id="btnPantallaRutina">Ver Rutina y Avances</button>
+      <button id="btnPantallaCarga">Carga Masiva de Rutinas</button>
       <button id="tabCorporales">Avances Corporales</button>
     </nav>
   
